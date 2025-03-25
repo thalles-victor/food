@@ -125,4 +125,17 @@ export class OrderTypeOrmRepository implements IOrderRepositoryContract {
       throw new InternalServerErrorException();
     }
   }
+
+  async getAllOrdersByUserId(userId: string): Promise<OrderEntity[]> {
+    try {
+      return await this.orderRepository
+        .createQueryBuilder('order')
+        .where('order."userId" = :userId', { userId })
+        .andWhere('deletedAt IS NULL')
+        .getMany();
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException();
+    }
+  }
 }

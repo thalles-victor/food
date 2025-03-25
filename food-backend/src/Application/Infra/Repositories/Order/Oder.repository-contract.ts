@@ -10,4 +10,6 @@ export interface IOrderRepositoryContract
     OrderEntity,
     OrderUpdateEntity,
     OrderUniqueRef
-  > {}
+  > {
+  getAllOrdersByUserId(userId: string): Promise<OrderEntity[]>;
+}
