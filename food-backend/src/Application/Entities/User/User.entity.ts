@@ -1,5 +1,6 @@
 import { TABLE } from 'src/Application/@shared/metadata';
-import { BaseEntity, Column, Entity } from 'typeorm';
+import { Column, Entity } from 'typeorm';
+import { BaseEntity } from '../Base.entity';
 
 @Entity(TABLE.user)
 export class UserEntity extends BaseEntity {
