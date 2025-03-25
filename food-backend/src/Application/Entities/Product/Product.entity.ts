@@ -20,6 +20,4 @@ export type ProductUpdateEntity = Partial<
 > &
   Pick<ProductEntity, 'updatedAt'>;
 
-export type ProductUniqueRefs = RequireOnlyOne<
-  Pick<ProductEntity, 'id' | 'unitPrice'>
->;
+export type ProductUniqueRefs = RequireOnlyOne<Pick<ProductEntity, 'id'>>;
