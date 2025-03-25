@@ -14,7 +14,7 @@ export class OrderController {
   @Get('my-orders')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @RolesDecorator(ROLE.USER, ROLE.ADMIN, ROLE.ROOT)
-  geMyOrders(@User() payload: PayloadType, @Body() orderDto: CreateOrderDto) {
+  geMyOrders(@User() payload: PayloadType) {
     return this.orderService.getMyOrders(payload);
   }
 
