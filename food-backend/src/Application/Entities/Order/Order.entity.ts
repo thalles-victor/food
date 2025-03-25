@@ -3,6 +3,8 @@ import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../Base.entity';
 import { OrderStatus } from './OrderStatus';
 import { OrderItem } from './Orderitem';
+import { UserEntity } from '../User/User.entity';
+import { RequireOnlyOne } from 'src/Application/@shared/types';
 
 @Entity(TABLE.order)
 export class OrderEntity extends BaseEntity {
@@ -24,3 +26,10 @@ export class OrderEntity extends BaseEntity {
   Status: OrderStatus[];
   Items: OrderItem[];
 }
+
+export type OrderUpdateEntity = Partial<
+  Pick<OrderEntity, 'totalPrice' | 'paymentUrl' | 'deletedAt'>
+> &
+  Pick<UserEntity, 'updatedAt'>;
+
+export type OrderUniqueRef = RequireOnlyOne<Pick<OrderEntity, 'id'>>;
