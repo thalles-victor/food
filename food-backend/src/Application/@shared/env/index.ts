@@ -36,6 +36,17 @@ const envSchema = z.object({
   POSTGRES_USER: z.string().nonempty(),
   POSTGRES_PASSWORD: z.string().nonempty(),
 
+  // MONGO
+  MONGO_HOST: z.string().nonempty(),
+  MONGO_PORT: z
+    .string()
+    .refine((val) => !isNaN(parseInt(val, 10)), {
+      message: 'POSTGRES_PORT must be a valid number',
+    })
+    .transform((val) => parseInt(val, 10)),
+  MONGO_INITDB_ROOT_USERNAME: z.string().nonempty(),
+  MONGO_INITDB_ROOT_PASSWORD: z.string().nonempty(),
+
   // REDIS
   REDIS_HOST: z.string().nonempty(),
   REDIS_PORT: z
