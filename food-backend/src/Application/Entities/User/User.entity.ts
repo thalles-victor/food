@@ -1,4 +1,4 @@
-import { TABLE } from 'src/Application/@shared/metadata';
+import { ROLE, TABLE } from 'src/Application/@shared/metadata';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../Base.entity';
 import { RequireOnlyOne } from 'src/Application/@shared/types';
@@ -8,8 +8,8 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50 })
   name: string;
 
-  @Column({ type: 'varchar', length: 20 })
-  phone: string;
+  @Column({ type: 'varchar', enum: ROLE, default: ROLE.USER, length: 15 })
+  roles: ROLE[];
 
   @Column({ type: 'varchar', length: 120 })
   email: string;
@@ -19,7 +19,7 @@ export class UserEntity extends BaseEntity {
 }
 
 export type UserUpdateEntity = Partial<
-  Pick<UserEntity, 'password' | 'name' | 'deletedAt'>
+  Pick<UserEntity, 'password' | 'name' | 'deletedAt' | 'roles'>
 > &
   Pick<UserEntity, 'updatedAt'>;
 

@@ -6,6 +6,7 @@ import { env } from './Application/@shared/env';
 import { ThrottlerModule } from '@nestjs/throttler';
 import Redis from 'ioredis';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
+import { AuthModule } from './Application/Domains/Auth/Auth.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
       migrationsRun: true,
       synchronize: true,
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

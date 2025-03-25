@@ -16,3 +16,9 @@ export enum TABLE {
   order_item = 'order-item',
   order_status = 'order-status',
 }
+
+export enum KEY_INJECTION {
+  USER_REPOSITORY = 'USER_REPOSITORY',
+  PRODUCT_REPOSITORY = 'PRODUCT_REPOSITORY',
+  ORDER_REPOSITORY = 'ORDER_REPOSITORY',
+}
