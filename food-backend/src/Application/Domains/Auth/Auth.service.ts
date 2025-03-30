@@ -1,5 +1,4 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { env } from 'process';
 import { KEY_INJECTION, ROLE } from 'src/Application/@shared/metadata';
 import { PayloadType } from 'src/Application/@shared/types';
 import { UserEntity } from 'src/Application/Entities/User/User.entity';
@@ -9,6 +8,7 @@ import { SignUpDto } from './dtos/SignUp.dto';
 import { IUserRepositoryContract } from 'src/Application/Infra/Repositories/User/User.repository-contract';
 import { SignInDto } from './dtos/SignIn.dto';
 import { JwtService } from '@nestjs/jwt';
+import { env } from 'src/Application/@shared/env';
 
 @Injectable()
 export class AuthService {
@@ -65,7 +65,10 @@ export class AuthService {
 
     return {
       user,
-      accessToken: token,
+      accessToken: {
+        token: token,
+        expiresIn: env.JWT_EXPIRES_IN,
+      },
     };
   }
 
@@ -101,7 +104,10 @@ export class AuthService {
 
     return {
       user,
-      accessToken: token,
+      accessToken: {
+        token: token,
+        expiresIn: env.JWT_EXPIRES_IN,
+      },
     };
   }
 

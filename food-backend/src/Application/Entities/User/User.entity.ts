@@ -8,7 +8,13 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50 })
   name: string;
 
-  @Column({ type: 'varchar', enum: ROLE, default: ROLE.USER, length: 15 })
+  @Column({
+    type: 'varchar',
+    array: true,
+    enum: ROLE,
+    default: [ROLE.USER],
+    length: 20,
+  })
   roles: ROLE[];
 
   @Column({ type: 'varchar', length: 120 })

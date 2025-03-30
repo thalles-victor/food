@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,6 +7,10 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import Redis from 'ioredis';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { AuthModule } from './Application/Domains/Auth/Auth.module';
+import { APP_PIPE } from '@nestjs/core';
+import { ProductModule } from './Application/Domains/Product/Product.module';
+import { OrderModule } from './Application/Domains/Order/Order.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -37,9 +41,23 @@ import { AuthModule } from './Application/Domains/Auth/Auth.module';
       migrationsRun: true,
       synchronize: true,
     }),
+    CacheModule.register({
+      isGlobal: true,
+    }),
     AuthModule,
+    ProductModule,
+    OrderModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        transform: true, // Transforma os parâmetros automaticamente
+        whitelist: true, // Remove campos não validados
+      }),
+    },
+    AppService,
+  ],
 })
 export class AppModule {}

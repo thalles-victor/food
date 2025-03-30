@@ -20,10 +20,10 @@ export class ProductService {
       createdAt: new Date(),
       updatedAt: new Date(),
       deletedAt: null,
-      description: productDto.description,
+      description: productDto.description ?? null,
       id: generateShortId(15),
       title: productDto.title,
-      unitPrice: productDto.unitPrice,
+      price: parseFloat(productDto.price.toString()).toFixed(2),
     });
 
     return productCreated;
@@ -45,7 +45,7 @@ export class ProductService {
       {
         title: productDto.title,
         description: productDto.description,
-        unitPrice: productDto.unitPrice,
+        price: productDto.unitPrice,
         updatedAt: new Date(),
       },
     );

@@ -8,15 +8,15 @@ export class ProductEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 40 })
   title: string;
 
-  @Column({ type: 'text' })
-  description: string;
+  @Column({ type: 'text', nullable: true, default: null })
+  description: string | null;
 
   @Column({ type: 'numeric' })
-  unitPrice: string;
+  price: string;
 }
 
 export type ProductUpdateEntity = Partial<
-  Pick<ProductEntity, 'title' | 'description' | 'unitPrice' | 'deletedAt'>
+  Pick<ProductEntity, 'title' | 'description' | 'price' | 'deletedAt'>
 > &
   Pick<ProductEntity, 'updatedAt'>;
 
