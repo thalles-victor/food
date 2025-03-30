@@ -13,6 +13,7 @@ import { IProductRepositoryContract } from 'src/Application/Infra/Repositories/P
 import { generateShortId, isValidCPF } from 'src/Application/@shared/utils';
 import { PayOrderDto } from './dtos/PayOrder.dtos';
 import { PaymentService } from 'src/Application/Infra/Payment/Payment.service';
+import { KafkaProducerService } from 'src/Application/Infra/Job/Kafka.produce.servicer';
 
 export class OrderService {
   constructor(
@@ -23,6 +24,7 @@ export class OrderService {
     @Inject(KEY_INJECTION.ORDER_REPOSITORY)
     private readonly orderRepository: IOrderRepositoryContract,
     private readonly paymentService: PaymentService,
+    private readonly kafkaProducer: KafkaProducerService,
   ) {}
 
   async create(payload: PayloadType, orderDto: CreateOrderDto) {
@@ -55,7 +57,7 @@ export class OrderService {
       deletedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      Status: [],
+      paidIn: null,
     });
 
     return orderCreated;
@@ -162,7 +164,13 @@ export class OrderService {
     return orderUpdated;
   }
 
-  acceptOrder() {} // super
-  sendOrder() {} // super
-  deliveryOrder() {} // user or super
+  async paymentConfirmWebHook(body: any, headers: any) {
+    await this.paymentService.WebHookVerification(body, headers);
+
+    if (body.resource.status === 'APPROVED') {
+      const orderId = body.resource.purchase_units[0].invoice_id;
+
+      this.kafkaProducer.savePaymentInBank({ orderId });
+    }
+  }
 }

@@ -11,6 +11,8 @@ import { APP_PIPE } from '@nestjs/core';
 import { ProductModule } from './Application/Domains/Product/Product.module';
 import { OrderModule } from './Application/Domains/Order/Order.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { KafkaProducerModule } from './Application/Infra/Job/Kafka.producer.module';
 
 @Module({
   imports: [
@@ -47,6 +49,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     AuthModule,
     ProductModule,
     OrderModule,
+    KafkaProducerModule,
   ],
   controllers: [AppController],
   providers: [

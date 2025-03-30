@@ -1,7 +1,6 @@
 import { TABLE } from 'src/Application/@shared/metadata';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../Base.entity';
-import { OrderStatus } from './OrderStatus';
 import { UserEntity } from '../User/User.entity';
 import { RequireOnlyOne } from 'src/Application/@shared/types';
 
@@ -25,7 +24,8 @@ export class OrderEntity extends BaseEntity {
   @Column({ type: 'varchar', nullable: true, default: null })
   paymentUrl: string | null;
 
-  Status: OrderStatus[];
+  @Column({ type: 'timestamptz', nullable: true, default: null })
+  paidIn: Date | null;
 }
 
 export type OrderUpdateEntity = Partial<

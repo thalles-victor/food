@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+  Headers,
+} from '@nestjs/common';
 import { OrderService } from './Order.service';
 import { CreateOrderDto } from './dtos/CreateOrder.dto';
 import { JwtAuthGuard } from 'src/Application/@shared/guards/jwt-auth.guard';
@@ -38,6 +46,8 @@ export class OrderController {
     return this.orderService.payOrder(user, paymentDto);
   }
 
-  @Post('paypal-web-hook')
-  paypalWebHook(@Body() body: any) {}
+  @Post('paypal-webhook')
+  paypalWebHook(@Body() body: any, @Headers() headers: any) {
+    return this.orderService.paymentConfirmWebHook(body, headers);
+  }
 }

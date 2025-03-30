@@ -1,5 +1,10 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PaypalGenerateUrlProps } from 'src/Application/@shared/types';
 import { CredentialsService } from '../Credentials/Credentials.service';
 import { env } from 'src/Application/@shared/env';
@@ -43,12 +48,8 @@ export class PaymentService {
       },
     };
 
-    console.log(JSON.stringify(body, null, 2));
-
     const paypalAccessToken =
       await this.credentialsService.getPaypalAccessToken();
-
-    console.log(paypalAccessToken);
 
     try {
       const paymentResult = await this.httpService.axiosRef.post(
@@ -73,6 +74,40 @@ export class PaymentService {
       console.error('Error creating PayPal order:', error.message);
 
       throw new InternalServerErrorException('Payment failed');
+    }
+  }
+
+  async WebHookVerification(body: any, headers: any) {
+    const paypalAccessToken =
+      await this.credentialsService.getPaypalAccessToken();
+
+    const verificationData = {
+      auth_algo: headers['paypal-auth-algo'],
+      cert_url: headers['paypal-cert-url'],
+      transmission_sig: headers['paypal-transmission-sig'],
+      transmission_id: headers['paypal-transmission-id'],
+      transmission_time: headers['paypal-transmission-time'],
+      webhook_id: env.WEB_HOOK_ID, // Substitua pelo seu Webhook ID do PayPal
+      webhook_event: body,
+    };
+    try {
+      const response = await this.httpService.axiosRef.post(
+        `${env.PAYPAL_BASE_URL}/v1/notifications/verify-webhook-signature`,
+        verificationData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${paypalAccessToken}`,
+          },
+        },
+      );
+
+      if (response.data.verification_status !== 'SUCCESS') {
+        throw new HttpException('Sgnature invalid', HttpStatus.FORBIDDEN);
+      }
+    } catch (e) {
+      console.log(e);
+      throw new InternalServerErrorException();
     }
   }
 }
