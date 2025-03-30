@@ -130,8 +130,8 @@ export class OrderTypeOrmRepository implements IOrderRepositoryContract {
     try {
       return await this.orderRepository
         .createQueryBuilder('order')
-        .where('order."userId" = :userId', { userId })
-        .andWhere('deletedAt IS NULL')
+        .where('"order"."userId" = :userId', { userId })
+        .andWhere('"order"."deletedAt" IS NULL')
         .getMany();
     } catch (e) {
       console.error(e);

@@ -10,7 +10,7 @@ import { KEY_INJECTION, ROLE } from 'src/Application/@shared/metadata';
 import { IOrderRepositoryContract } from 'src/Application/Infra/Repositories/Order/Oder.repository-contract';
 import { IUserRepositoryContract } from 'src/Application/Infra/Repositories/User/User.repository-contract';
 import { IProductRepositoryContract } from 'src/Application/Infra/Repositories/Product/Product.repository-contract';
-import { generateShortId } from 'src/Application/@shared/utils';
+import { generateShortId, isValidCPF } from 'src/Application/@shared/utils';
 import { PayOrderDto } from './dtos/PayOrder.dtos';
 import { PaymentService } from 'src/Application/Infra/Payment/Payment.service';
 
@@ -40,10 +40,14 @@ export class OrderService {
       throw new NotFoundException('product not found');
     }
 
+    const totalPrice = (
+      parseFloat(product.price) * orderDto.quantity
+    ).toString();
+
     const orderCreated = await this.orderRepository.create({
       id: generateShortId(15),
       title: `Compra do item: ${product.title}`,
-      totalPrice: 'calcular dps',
+      totalPrice: totalPrice,
       quantity: orderDto.quantity,
       paymentUrl: null,
       productId: product.id,
@@ -88,16 +92,26 @@ export class OrderService {
   }
 
   async payOrder(payload: PayloadType, paymentDto: PayOrderDto) {
+    if (!isValidCPF(paymentDto.cpfCnpj)) {
+      throw new InternalServerErrorException('cpf or cnpj is invalid');
+    }
+
     const user = await this.userRepository.getBy({ id: payload.sub });
 
-    if (!user) {
+    if (!user || user.deletedAt) {
       throw new UnauthorizedException();
     }
 
     const order = await this.orderRepository.getBy({ id: paymentDto.orderId });
 
-    if (!order || order.deletedAt) {
+    if (!order || order.deletedAt || order.userId !== payload.sub) {
       throw new NotFoundException('order not found');
+    }
+
+    const product = await this.productRepository.getBy({ id: order.productId });
+
+    if (!product || product.deletedAt) {
+      throw new InternalServerErrorException('product not found');
     }
 
     if (order.paymentUrl) {
@@ -107,21 +121,21 @@ export class OrderService {
     let paymentResult;
     try {
       paymentResult = await this.paymentService.paypalGenerateUrl({
+        customer: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          cpfCnpjTaxId: paymentDto.cpfCnpj,
+        },
         order: {
           id: order.id,
           totalPrice: order.totalPrice,
           items: [
             {
               currencyCode: 'BRL',
-              price: order.totalPrice,
+              price: product.price,
             },
           ],
-        },
-        customer: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          cpfCnpjTaxId: paymentDto.cpfCnpj,
         },
       });
     } catch (e) {
@@ -131,12 +145,16 @@ export class OrderService {
       );
     }
 
+    const paymentLink = paymentResult.links.find(
+      (link) => link.rel === 'payer-action',
+    );
+
     const orderUpdated = await this.orderRepository.update(
       {
         id: paymentDto.orderId,
       },
       {
-        paymentUrl: paymentResult.url,
+        paymentUrl: paymentLink.href,
         updatedAt: new Date(),
       },
     );

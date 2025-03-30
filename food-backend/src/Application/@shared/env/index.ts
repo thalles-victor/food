@@ -5,13 +5,18 @@ import { STORAGE_PROVIDER } from '../metadata';
 
 const envSchema = z.object({
   // SELF-BACKEND
-  BACKEND_BASE_URL: z.string().url().nonempty(),
   BACKEND_PORT: z
     .string()
     .refine((val) => !isNaN(parseInt(val, 10)), {
       message: 'POSTGRES_PORT must be a valid number',
     })
     .transform((val) => parseInt(val, 10)),
+  BACKEND_PROTOCOL: z.string().nonempty(),
+  BACKEND_DOMAIN: z.string().nonempty(),
+
+  // FRONTEND
+  FRONTEND_URL: z.string().nonempty(),
+  FRONTEND_PAYMENT_REDIRECT: z.string().nonempty(),
 
   // AUTH
   JWT_SECRET: z.string().nonempty(),

@@ -1,8 +1,8 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { env } from 'process';
 import { PaypalGenerateUrlProps } from 'src/Application/@shared/types';
 import { CredentialsService } from '../Credentials/Credentials.service';
+import { env } from 'src/Application/@shared/env';
 
 @Injectable()
 export class PaymentService {
@@ -21,10 +21,10 @@ export class PaymentService {
             currency_code: 'BRL',
             value: props.order.totalPrice,
             breakdown: {
-              item_total: props.order.items.map((item) => ({
-                currency_code: item.currencyCode,
-                value: item.price,
-              })),
+              item_total: {
+                currency_code: 'BRL',
+                value: props.order.totalPrice,
+              },
             },
           },
         },
@@ -36,15 +36,19 @@ export class PaymentService {
             landing_page: 'LOGIN',
             shipping_preference: 'GET_FROM_FILE',
             user_action: 'PAY_NOW',
-            return_url: `${env.FRONTEND_PAYMENT_REDIRECT_URL}`,
-            cancel_url: `${env.BACKEND_PROTOCOL}://${env.BACKEND_DOMAIN}:${env.PORT}/paypal/cancel`,
+            return_url: `${env.FRONTEND_URL}/${env.FRONTEND_PAYMENT_REDIRECT}`,
+            cancel_url: `${env.BACKEND_PROTOCOL}://${env.BACKEND_PORT}/${env.BACKEND_DOMAIN}:${env.BACKEND_PORT}/paypal/cancel`,
           },
         },
       },
     };
 
+    console.log(JSON.stringify(body, null, 2));
+
     const paypalAccessToken =
       await this.credentialsService.getPaypalAccessToken();
+
+    console.log(paypalAccessToken);
 
     try {
       const paymentResult = await this.httpService.axiosRef.post(
